@@ -1,0 +1,13 @@
+{
+    "name": "teste-sps",
+    "version": "1.0.0",
+    "scripts": {
+        "start:backend": "cd server && npm run dev",
+        "start:frontend": "cd client && npm run start",
+
+        "start": "concurrently \"npm:start:backend\" \"npm:start:frontend\""
+    },
+    "devDependencies": {
+        "concurrently": "^9.1.2"
+    }
+}
