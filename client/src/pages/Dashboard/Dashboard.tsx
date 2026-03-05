@@ -9,6 +9,7 @@ import { UsersTable } from "./components/UsersTable";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { House } from 'lucide-react';
 
 const userService = new UserService();
 
@@ -121,7 +122,7 @@ function Dashboard() {
     return (
         <div className="flex min-h-svh flex-col items-center bg-muted p-6 md:p-10">
             <div className="w-full max-w-6xl">
-                <Button className="mb-4" onClick={() => navigate("/")}>Voltar para Home</Button>
+                <Button className="mb-4" size="icon" onClick={() => navigate("/")}><House /></Button>
                 <Card className="p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
                         <div>
