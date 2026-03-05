@@ -1,6 +1,8 @@
 ----------------------------------
 ESPANHOL
-----------------------------------
+---
+
+---
 
 ## PRUEBA SPS REACT
 
@@ -13,10 +15,9 @@ ESPANHOL
 - Solo será posible registrar y/o visualizar usuarios si el usuario está autenticado.
 - Consumir la API creada anteriormente (test-sps-server).
 
+---
 
-----------------------------------
-PORTUGUÊS
-----------------------------------
+## PORTUGUÊS
 
 # SPS REACT TEST
 
