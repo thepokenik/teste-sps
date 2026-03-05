@@ -6,6 +6,8 @@ import { CreateUserDialog } from "./components/CreateUserDialog";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { DeleteUserDialog } from "./components/DeleteUserDialog";
 import { UsersTable } from "./components/UsersTable";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const userService = new UserService();
 
@@ -17,6 +19,8 @@ function Dashboard() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
         fetchUsers();
     }, []);
@@ -26,9 +30,10 @@ function Dashboard() {
             setIsLoading(true);
             const response = await userService.list();
             setUsers(response.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching users:", error);
-            toast.error("Erro ao carregar usuários.");
+            const message = error?.response?.data?.error || "Erro ao carregar usuários.";
+            toast.error(message);
         } finally {
             setIsLoading(false);
         }
@@ -40,15 +45,17 @@ function Dashboard() {
         const name = formData.get("name") as string;
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
+        const type = formData.get("type") as string;
 
         try {
-            await userService.create({ name, email, type: "user", password });
+            await userService.create({ name, email, type, password });
             toast.success("Usuário criado com sucesso!");
             fetchUsers();
             setCreateDialogOpen(false);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error creating user:", error);
-            toast.error("Erro ao criar usuário.");
+            const message = error?.response?.data?.error || "Erro ao criar usuário.";
+            toast.error(message);
         }
     }
 
@@ -60,9 +67,10 @@ function Dashboard() {
         const name = formData.get("name") as string;
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
+        const type = formData.get("type") as string;
 
         try {
-            const updateData: any = { name, email };
+            const updateData: any = { name, email, type };
             if (password) {
                 updateData.password = password;
             }
@@ -72,9 +80,10 @@ function Dashboard() {
             setEditDialogOpen(false);
             setSelectedUser(null);
             fetchUsers();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error updating user:", error);
-            toast.error("Erro ao atualizar usuário.");
+            const message = error?.response?.data?.error || "Erro ao atualizar usuário.";
+            toast.error(message);
         }
     }
 
@@ -87,9 +96,10 @@ function Dashboard() {
             setDeleteDialogOpen(false);
             setSelectedUser(null);
             fetchUsers();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error deleting user:", error);
-            toast.error("Erro ao excluir usuário.");
+            const message = error?.response?.data?.error || "Erro ao excluir usuário.";
+            toast.error(message);
         }
     }
 
@@ -103,9 +113,11 @@ function Dashboard() {
         setDeleteDialogOpen(true);
     }
 
+
     return (
         <div className="flex min-h-svh flex-col items-center bg-muted p-6 md:p-10">
             <div className="w-full max-w-6xl">
+                <Button className="mb-4" onClick={() => navigate("/")}>Voltar para Home</Button>
                 <Card className="p-6 mb-6">
                     <div className="flex justify-between items-center mb-4">
                         <div>
