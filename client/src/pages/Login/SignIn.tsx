@@ -24,8 +24,9 @@ function SignIn() {
             navigate("/");
             toast.success('Login realizado com sucesso!');
             setLoading(false);
-        } catch {
-            toast.error("E-mail ou senha inválidos.");
+        } catch (error: any) {
+            const message = error?.response?.data?.error || "E-mail ou senha inválidos.";
+            toast.error(message);
             setLoading(false);
         }
     }

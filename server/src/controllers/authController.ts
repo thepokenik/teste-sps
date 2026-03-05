@@ -8,7 +8,7 @@ const login = (req: Request, res: Response): void => {
     const user = users.find((u) => u.email === email);
 
     if (!user || user.password !== password) {
-        res.status(401).json({ error: "Email or password is invalid" });
+        res.status(401).json({ error: "Email ou senha inválidos." });
         return;
     }
 
