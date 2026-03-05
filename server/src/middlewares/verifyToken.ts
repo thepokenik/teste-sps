@@ -18,14 +18,14 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-        res.status(401).json({ error: "Token not provided" });
+        res.status(401).json({ error: "Token não fornecido." });
         return;
     }
 
     const parts = authHeader.split(" ");
 
     if (parts.length !== 2 || parts[0] !== "Bearer") {
-        res.status(401).json({ error: "Invalid token format" });
+        res.status(401).json({ error: "Formato de token inválido." });
         return;
     }
 
@@ -36,7 +36,7 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
         req.user = decoded;
         next();
     } catch {
-        res.status(401).json({ error: "Token invalid or expired" });
+        res.status(401).json({ error: "Token invalido ou expirado." });
     }
 };
 

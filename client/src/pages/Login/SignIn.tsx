@@ -25,7 +25,7 @@ function SignIn() {
             toast.success('Login realizado com sucesso!');
             setLoading(false);
         } catch (error: any) {
-            const message = error?.response?.data?.error || "E-mail ou senha inválidos.";
+            const message = error?.response?.data?.error || "Sistema temporariamente indisponível. Tente novamente mais tarde.";
             toast.error(message);
             setLoading(false);
         }
