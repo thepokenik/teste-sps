@@ -63,6 +63,19 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
                                     placeholder="Deixe em branco para não alterar"
                                 />
                             </Field>
+                            <Field>
+                                <Label htmlFor="edit-type">Tipo de Usuário</Label>
+                                <select
+                                    id="edit-type"
+                                    name="type"
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    required
+                                    defaultValue={user?.type || "user"}
+                                >
+                                    <option value="user">Usuário</option>
+                                    <option value="admin">Administrador</option>
+                                </select>
+                            </Field>
                         </FieldGroup>
                     </div>
 
