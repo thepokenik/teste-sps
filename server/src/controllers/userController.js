@@ -11,12 +11,12 @@ const createUser = (req, res) => {
 	if (!name || !email || !password) {
 		return res
 			.status(400)
-			.json({ error: "Name, email and password are required" });
+			.json({ error: "Nome, email e senha são obrigatórios" });
 	}
 
 	const exists = users.find((u) => u.email === email);
 	if (exists) {
-		return res.status(400).json({ error: "Email already registered" });
+		return res.status(400).json({ error: "Email já registrado por outro usuário" });
 	}
 
 	const newId =
@@ -35,7 +35,7 @@ const updateUser = (req, res) => {
 
 	const index = users.findIndex((u) => u.id === Number(id));
 	if (index === -1) {
-		return res.status(404).json({ error: "User not found" });
+		return res.status(404).json({ error: "Usuário não encontrado" });
 	}
 
 	if (email && email !== users[index].email) {
@@ -45,7 +45,7 @@ const updateUser = (req, res) => {
 		if (emailExists) {
 			return res
 				.status(400)
-				.json({ error: "Email already registered by another user" });
+				.json({ error: "Email já registrado por outro usuário" });
 		}
 	}
 
@@ -63,7 +63,7 @@ const deleteUser = (req, res) => {
 
 	const index = users.findIndex((u) => u.id === Number(id));
 	if (index === -1) {
-		return res.status(404).json({ error: "User not found" });
+		return res.status(404).json({ error: "Usuário não encontrado" });
 	}
 
 	users.splice(index, 1);
