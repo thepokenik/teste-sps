@@ -22,10 +22,10 @@ function SignIn() {
             const { token, user } = await authService.login(email, password);
             login(token, user);
             navigate("/");
+            toast.success('Login realizado com sucesso!');
+            setLoading(false);
         } catch {
             toast.error("E-mail ou senha inválidos.");
-        } finally {
-            toast.success('Login realizado com sucesso!');
             setLoading(false);
         }
     }
