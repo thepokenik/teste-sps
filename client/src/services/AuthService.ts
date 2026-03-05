@@ -1,25 +1,23 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_SERVER_URL;
+import api from "@/services/api";
 
 interface LoginResponse {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    type: string;
-  };
-  token: string;
+    user: {
+        id: number;
+        name: string;
+        email: string;
+        type: string;
+    };
+    token: string;
 }
 
 class AuthService {
-  async login(email: string, password: string): Promise<LoginResponse> {
-    const response = await axios.post<LoginResponse>(`${API_URL}/login`, {
-      email,
-      password,
-    });
-    return response.data;
-  }
+    async login(email: string, password: string): Promise<LoginResponse> {
+        const response = await api.post<LoginResponse>("/login", {
+            email,
+            password,
+        });
+        return response.data;
+    }
 }
 
 export type { LoginResponse };

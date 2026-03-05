@@ -1,4 +1,5 @@
-import axios, { type AxiosResponse } from "axios";
+import api from "@/services/api";
+import type { AxiosResponse } from "axios";
 
 interface User {
     id: number;
@@ -22,33 +23,26 @@ interface UpdateUserData {
 }
 
 class UserService {
-    private baseUrl = `${import.meta.env.VITE_SERVER_URL}/users`;
-
-    private getHeaders() {
-        const token = localStorage.getItem("token");
-        return {
-            Authorization: `Bearer ${token}`,
-        };
-    }
+    private baseUrl = "/users";
 
     async list(): Promise<AxiosResponse<User[]>> {
-        return axios.get<User[]>(this.baseUrl, { headers: this.getHeaders() });
+        return api.get<User[]>(this.baseUrl);
     }
 
     async get(id: number): Promise<AxiosResponse<User>> {
-        return axios.get<User>(`${this.baseUrl}/${id}`, { headers: this.getHeaders() });
+        return api.get<User>(`${this.baseUrl}/${id}`);
     }
 
     async create(data: CreateUserData): Promise<AxiosResponse<User>> {
-        return axios.post<User>(this.baseUrl, data, { headers: this.getHeaders() });
+        return api.post<User>(this.baseUrl, data);
     }
 
     async delete(id: number): Promise<AxiosResponse<void>> {
-        return axios.delete(`${this.baseUrl}/${id}`, { headers: this.getHeaders() });
+        return api.delete(`${this.baseUrl}/${id}`);
     }
 
     async update(id: number, data: UpdateUserData): Promise<AxiosResponse<User>> {
-        return axios.put<User>(`${this.baseUrl}/${id}`, data, { headers: this.getHeaders() });
+        return api.put<User>(`${this.baseUrl}/${id}`, data);
     }
 }
 
