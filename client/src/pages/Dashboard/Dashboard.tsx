@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import UserService, { type User } from "@/services/UserService";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import UserService, { type User } from "@/services/UserService";
 import { CreateUserDialog } from "./components/CreateUserDialog";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { DeleteUserDialog } from "./components/DeleteUserDialog";
 import { UsersTable } from "./components/UsersTable";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Card } from "@/components/ui/card";
 
 const userService = new UserService();
 
@@ -20,6 +21,9 @@ function Dashboard() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     const navigate = useNavigate();
+
+    const { user } = useAuth();
+    const isAdmin = user?.type === "admin";
 
     useEffect(() => {
         fetchUsers();
@@ -130,16 +134,25 @@ function Dashboard() {
                             open={createDialogOpen}
                             onOpenChange={setCreateDialogOpen}
                             onSubmit={handleCreateUser}
+                            disabled={!isAdmin}
                         />
                     </div>
 
                     <div className="mt-6">
-                        <UsersTable
-                            users={users}
-                            isLoading={isLoading}
-                            onEdit={openEditDialog}
-                            onDelete={openDeleteDialog}
-                        />
+                        {isAdmin ? (
+                            <UsersTable
+                                users={users}
+                                isLoading={isLoading}
+                                onEdit={openEditDialog}
+                                onDelete={openDeleteDialog}
+                            />
+                        ) : (
+                            <div className="mb-4 p-3 bg-muted/50 rounded-md border border-muted-foreground/20">
+                                <p className="text-sm text-muted-foreground text-center">
+                                    Apenas administradores podem ver, criar, editar ou excluir usuários.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </Card>
 

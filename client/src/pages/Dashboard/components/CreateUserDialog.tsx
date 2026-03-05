@@ -17,13 +17,14 @@ interface CreateUserDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    disabled?: boolean;
 }
 
-export function CreateUserDialog({ open, onOpenChange, onSubmit }: CreateUserDialogProps) {
+export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = false }: CreateUserDialogProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
-                <Button>Criar Usuário</Button>
+                <Button disabled={disabled}>Criar Usuário</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <form onSubmit={onSubmit}>
