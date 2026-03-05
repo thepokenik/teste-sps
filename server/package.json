@@ -1,10 +1,12 @@
 {
   "name": "test-sps-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": " nodemon src/index.js"
+    "dev": "nodemon --exec tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
@@ -13,6 +15,12 @@
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.3.3",
+    "nodemon": "^3.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
