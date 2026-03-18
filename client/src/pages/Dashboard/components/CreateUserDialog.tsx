@@ -14,6 +14,9 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { DragDrop, DragDropInfo, DragDropInput } from "@/components/ui/DragDrop";
 import { useFileUploader, UploadedFile } from "../../../hooks/useFileUploader";
+import { ImagePreviewDialog } from "./ImagePreviewDialog";
+import { useState } from "react";
+import { Eye } from "lucide-react";
 
 interface CreateUserDialogProps {
     open: boolean;
@@ -23,6 +26,8 @@ interface CreateUserDialogProps {
 }
 
 export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = false }: CreateUserDialogProps) {
+    const [previewOpen, setPreviewOpen] = useState(false);
+
     const fileUploaderHook = useFileUploader({
         accept: '.png,.jpg,image/jpeg',
         maxSize: 5 * 1024 * 1024, // 5MB
@@ -97,7 +102,20 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = fals
                             <Field>
                                 <Label htmlFor="create-image">Adicione uma imagem de usuario (opcional)</Label>
                                 <DragDrop hook={fileUploaderHook}>
-                                    <DragDropInput id="image" />
+                                    <div className="flex flex-col gap-2">
+                                        <DragDropInput id="image" />
+                                        {previewUrl && (
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => setPreviewOpen(true)}
+                                            >
+                                                <Eye className="w-4 h-4 mr-2" />
+                                                Ver preview da imagem
+                                            </Button>
+                                        )}
+                                    </div>
                                     <DragDropInfo />
                                 </DragDrop>
                             </Field>
@@ -111,6 +129,12 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = fals
                         <Button type="submit">Criar</Button>
                     </DialogFooter>
                 </form>
+
+                <ImagePreviewDialog
+                    open={previewOpen}
+                    onOpenChange={setPreviewOpen}
+                    imageUrl={previewUrl}
+                />
             </DialogContent>
         </Dialog>
     );

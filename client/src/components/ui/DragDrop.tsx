@@ -69,7 +69,7 @@ export const DragDropInput = React.forwardRef<HTMLInputElement, DragDropInputPro
                 <label
                     htmlFor={id}
                     className={cn(
-                        'group relative flex flex-relative items-center gap-4 justify-center w-full h-32 rounded-lg border-2 border-dashed border-gray-400 cursor-pointer transition-colors',
+                        'group relative flex flex-relative items-center gap-4 justify-center w-full h-18 rounded-lg border-2 border-dashed border-gray-400 cursor-pointer transition-colors',
                         'hover:border-blue-600 hover:text-blue-600',
                         { 'border-blue-600 text-blue-600': isDragging },
                         className,

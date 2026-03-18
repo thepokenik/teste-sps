@@ -14,7 +14,9 @@ import { Label } from "@/components/ui/label";
 import type { User } from "@/services/UserService";
 import { DragDrop, DragDropInfo, DragDropInput } from "@/components/ui/DragDrop";
 import { useFileUploader, UploadedFile } from "../../../hooks/useFileUploader";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { Eye } from "lucide-react";
+import { ImagePreviewDialog } from "./ImagePreviewDialog";
 
 interface EditUserDialogProps {
     open: boolean;
@@ -24,6 +26,8 @@ interface EditUserDialogProps {
 }
 
 export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserDialogProps) {
+    const [previewOpen, setPreviewOpen] = useState(false);
+
     const initialFiles = useMemo(
         () => (user?.imageUrl ? [Object.assign(new File([], "current-image"), { url: user.imageUrl })] : []),
         [user?.imageUrl],
@@ -40,10 +44,6 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
     const previewUrl = selectedFile ? (selectedFile.url || URL.createObjectURL(selectedFile)) : "";
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        // null tells the parent the file was removed; undefined means it might have a file or not. 
-        // Or we just pass the file. If fileUploaderHook.files is empty, selectedFile is undefined.
-        // If there was an image and now there isn't one, we pass null to distinguish.
-        // Actually, if selectedFile is undefined, the parent can know it's empty.
         onSubmit(e, selectedFile || null);
     };
 
@@ -106,12 +106,18 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
                                 <Label htmlFor="create-image">Edite a imagem de usuario</Label>
                                 <DragDrop hook={fileUploaderHook}>
                                     <DragDropInput id="image" />
-                                    <DragDropInfo />
                                 </DragDrop>
                                 {previewUrl && (
-                                    <div className="mt-4 flex justify-center">
-                                        <img src={previewUrl} alt="Preview" className="h-24 w-24 object-cover rounded-full shadow-md" />
-                                    </div>
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="mt-2" 
+                                        onClick={() => setPreviewOpen(true)}
+                                    >
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        Ver preview da imagem
+                                    </Button>
                                 )}
                             </Field>
                         </FieldGroup>
@@ -124,6 +130,12 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
                         <Button type="submit">Salvar</Button>
                     </DialogFooter>
                 </form>
+
+                <ImagePreviewDialog 
+                    open={previewOpen} 
+                    onOpenChange={setPreviewOpen} 
+                    imageUrl={previewUrl} 
+                />
             </DialogContent>
         </Dialog>
     );
