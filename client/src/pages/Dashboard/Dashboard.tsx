@@ -9,7 +9,8 @@ import { UsersTable } from "./components/UsersTable";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { House } from 'lucide-react';
+import { House, Paperclip } from 'lucide-react';
+import { CreateAttachsDialog } from "./components/CreateAttachsDialog";
 
 const userService = new UserService();
 
@@ -19,12 +20,13 @@ function Dashboard() {
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [attachsDialogOpen, setAttachsDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     const navigate = useNavigate();
 
-    const { user } = useAuth();
-    const isAdmin = user?.type === "admin";
+    const { user: authUser, updateUser: updateAuthUser } = useAuth();
+    const isAdmin = authUser?.type === "admin";
 
     useEffect(() => {
         fetchUsers();
@@ -51,9 +53,10 @@ function Dashboard() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const type = formData.get("type") as string;
+        const imageUrl = (formData.get("imageUrl") as string) || undefined;
 
         try {
-            await userService.create({ name, email, type, password });
+            await userService.create({ name, email, type, password, imageUrl });
             toast.success("Usuário criado com sucesso!");
             fetchUsers();
             setCreateDialogOpen(false);
@@ -73,14 +76,20 @@ function Dashboard() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const type = formData.get("type") as string;
+        const imageUrl = (formData.get("imageUrl") as string) ?? "";
 
         try {
-            const updateData: any = { name, email, type };
+            const updateData: any = { name, email, type, imageUrl };
             if (password) {
                 updateData.password = password;
             }
 
-            await userService.update(selectedUser.id, updateData);
+            const response = await userService.update(selectedUser.id, updateData);
+
+            if (authUser?.id === selectedUser.id) {
+                updateAuthUser(response.data);
+            }
+
             toast.success("Usuário atualizado com sucesso!");
             setEditDialogOpen(false);
             setSelectedUser(null);
@@ -118,6 +127,10 @@ function Dashboard() {
         setDeleteDialogOpen(true);
     }
 
+    function openAttachsDialog(user: User) {
+        setSelectedUser(user);
+        setAttachsDialogOpen(true);
+    }
 
     return (
         <div className="flex min-h-svh flex-col items-center bg-muted p-6 md:p-10">
@@ -146,6 +159,7 @@ function Dashboard() {
                                 isLoading={isLoading}
                                 onEdit={openEditDialog}
                                 onDelete={openDeleteDialog}
+                                onAttach={openAttachsDialog}
                             />
                         ) : (
                             <div className="mb-4 p-3 bg-muted/50 rounded-md border border-muted-foreground/20">
@@ -169,6 +183,12 @@ function Dashboard() {
                     onOpenChange={setDeleteDialogOpen}
                     onConfirm={handleDeleteUser}
                     user={selectedUser}
+                />
+
+                <CreateAttachsDialog
+                    open={attachsDialogOpen}
+                    onOpenChange={setAttachsDialogOpen}
+                    onSubmit={handleCreateUser}
                 />
             </div>
         </div>

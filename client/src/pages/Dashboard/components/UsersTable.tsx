@@ -6,9 +6,10 @@ interface UsersTableProps {
     isLoading: boolean;
     onEdit: (user: User) => void;
     onDelete: (user: User) => void;
+    onAttach: (user: User) => void;
 }
 
-export function UsersTable({ users, isLoading, onEdit, onDelete }: UsersTableProps) {
+export function UsersTable({ users, isLoading, onEdit, onDelete, onAttach }: UsersTableProps) {
     if (isLoading) {
         return (
             <p className="text-center py-8 text-muted-foreground">
@@ -51,6 +52,13 @@ export function UsersTable({ users, isLoading, onEdit, onDelete }: UsersTablePro
                                     onClick={() => onEdit(user)}
                                 >
                                     Editar
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onAttach(user)}
+                                >
+                                    Anexos
                                 </Button>
                                 <Button
                                     variant="destructive"

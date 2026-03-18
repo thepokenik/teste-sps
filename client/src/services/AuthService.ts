@@ -6,6 +6,7 @@ interface LoginResponse {
         name: string;
         email: string;
         type: string;
+        imageUrl?: string;
     };
     token: string;
 }

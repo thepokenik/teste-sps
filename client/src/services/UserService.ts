@@ -6,6 +6,7 @@ interface User {
     name: string;
     email: string;
     type: string;
+    imageUrl?: string;
 }
 
 interface CreateUserData {
@@ -13,6 +14,7 @@ interface CreateUserData {
     email: string;
     type: string;
     password: string;
+    imageUrl?: string;
 }
 
 interface UpdateUserData {
@@ -20,6 +22,7 @@ interface UpdateUserData {
     email?: string;
     type?: string;
     password?: string;
+    imageUrl?: string;
 }
 
 class UserService {

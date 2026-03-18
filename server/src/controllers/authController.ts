@@ -57,6 +57,7 @@ const login = (req: Request, res: Response): void => {
             name: user.name,
             email: user.email,
             type: user.type,
+            imageUrl: user.imageUrl,
         },
         token,
     });

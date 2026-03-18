@@ -10,9 +10,11 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
+const BODY_LIMIT = process.env.BODY_LIMIT || "10mb";
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: BODY_LIMIT }));
+app.use(express.urlencoded({ extended: true, limit: BODY_LIMIT }));
 
 app.get("/", (req, res) => {
     res.json({ message: "API is running!" });
@@ -20,6 +22,16 @@ app.get("/", (req, res) => {
 
 app.use("/", authRoutes);
 app.use("/", userRoutes);
+
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err?.type === "entity.too.large") {
+        res.status(413).json({
+            error: `Payload muito grande. O limite atual é ${BODY_LIMIT}.`,
+        });
+        return;
+    }
+    next(err);
+});
 
 const PORT = process.env.PORT || 3001;
 

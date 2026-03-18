@@ -4,6 +4,7 @@ interface User {
     email: string;
     type: string;
     password: string;
+    imageUrl?: string;
 }
 
 const users: User[] = [

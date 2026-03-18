@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import Example from "@/assets/example.png"
 
 function Home() {
     const { isAuthenticated, user, logout } = useAuth();
@@ -24,6 +25,11 @@ function Home() {
                                 <p className="text-sm text-muted-foreground text-center">
                                     Você está conectado ao painel de administração
                                 </p>
+                                {user?.imageUrl ? (
+                                    <img src={user.imageUrl} alt="User Avatar" className="w-24 h-24 rounded-2xl object-cover" />
+                                ) : (
+                                    <img src={Example} alt="Example" className="w-24 h-24 rounded-2xl object-cover" />
+                                )}
                                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                     <Button asChild className="w-full sm:w-auto">
                                         <Link to="/users">Gerenciar Usuários</Link>

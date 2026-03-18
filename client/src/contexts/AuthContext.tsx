@@ -5,12 +5,14 @@ interface AuthUser {
     name: string;
     email: string;
     type: string;
+    imageUrl?: string;
 }
 
 interface AuthContextType {
     token: string | null;
     user: AuthUser | null;
     login: (token: string, user: AuthUser) => void;
+    updateUser: (updatedUser: AuthUser) => void;
     logout: () => void;
     isAuthenticated: boolean;
 }
@@ -47,6 +49,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(newUser);
     };
 
+    const updateUser = (updatedUser: AuthUser) => {
+        setUser(updatedUser);
+    };
+
     const logout = () => {
         setToken(null);
         setUser(null);
@@ -54,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return (
         <AuthContext.Provider
-            value={{ token, user, login, logout, isAuthenticated: !!token }}
+            value={{ token, user, login, updateUser, logout, isAuthenticated: !!token }}
         >
             {children}
         </AuthContext.Provider>

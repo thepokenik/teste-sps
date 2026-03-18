@@ -7,7 +7,7 @@ const listUsers = (req: Request, res: Response): void => {
 };
 
 const createUser = (req: Request, res: Response): void => {
-    const { name, email, type, password } = req.body;
+    const { name, email, type, password, imageUrl } = req.body;
 
     if (!name || !email || !password) {
         res.status(400).json({ error: "Nome, email e senha são obrigatórios" });
@@ -22,7 +22,7 @@ const createUser = (req: Request, res: Response): void => {
 
     const newId = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
 
-    const newUser = { id: newId, name, email, type: type || "user", password };
+    const newUser = { id: newId, name, email, type: type || "user", password, imageUrl };
     users.push(newUser);
 
     const { password: _, ...userWithoutPassword } = newUser;
@@ -31,7 +31,7 @@ const createUser = (req: Request, res: Response): void => {
 
 const updateUser = (req: Request, res: Response): void => {
     const { id } = req.params;
-    const { name, email, type, password } = req.body;
+    const { name, email, type, password, imageUrl } = req.body;
 
     const index = users.findIndex((u) => u.id === Number(id));
     if (index === -1) {
@@ -53,7 +53,13 @@ const updateUser = (req: Request, res: Response): void => {
     if (email) users[index].email = email;
     if (type) users[index].type = type;
     if (password) users[index].password = password;
-
+    if (typeof imageUrl === "string") {
+        if (imageUrl.trim()) {
+            users[index].imageUrl = imageUrl;
+        } else {
+            delete users[index].imageUrl;
+        }
+    }
     const { password: _, ...userWithoutPassword } = users[index];
     res.json(userWithoutPassword);
 };

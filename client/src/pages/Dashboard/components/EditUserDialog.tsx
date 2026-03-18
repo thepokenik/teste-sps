@@ -12,6 +12,9 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { User } from "@/services/UserService";
+import { DragDrop, DragDropInfo, DragDropInput } from "@/components/ui/DragDrop";
+import { useFileUploader } from "../../../hooks/useFileUploader";
+import { useEffect, useMemo, useState } from "react";
 
 interface EditUserDialogProps {
     open: boolean;
@@ -21,6 +24,45 @@ interface EditUserDialogProps {
 }
 
 export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserDialogProps) {
+    const [imageUrl, setImageUrl] = useState<string>("");
+
+    const initialFiles = useMemo(
+        () => (user?.imageUrl ? [Object.assign(new File([], "current-image"), { url: user.imageUrl })] : []),
+        [user?.imageUrl],
+    );
+
+    const fileUploaderHook = useFileUploader({
+        accept: '.png,.jpg,image/jpeg',
+        maxSize: 5 * 1024 * 1024, // 5MB
+        multiple: false,
+        initialFiles,
+    });
+
+    useEffect(() => {
+        if (fileUploaderHook.files.length === 0) {
+            setImageUrl("");
+            return;
+        }
+
+        const selectedFile = fileUploaderHook.files[0];
+
+        if (selectedFile.url) {
+            setImageUrl(selectedFile.url);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setImageUrl(typeof reader.result === "string" ? reader.result : "");
+        };
+        reader.onerror = () => {
+            setImageUrl("");
+            console.error("Erro ao processar arquivo");
+        };
+
+        reader.readAsDataURL(selectedFile);
+    }, [fileUploaderHook.files, fileUploaderHook.errors]);
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
@@ -75,6 +117,14 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
                                     <option value="user">Usuário</option>
                                     <option value="admin">Administrador</option>
                                 </select>
+                            </Field>
+                            <Field>
+                                <Label htmlFor="create-image">Edite a imagem de usuario</Label>
+                                <DragDrop hook={fileUploaderHook}>
+                                    <DragDropInput id="image" />
+                                    <DragDropInfo />
+                                </DragDrop>
+                                <input type="hidden" name="imageUrl" value={imageUrl} />
                             </Field>
                         </FieldGroup>
                     </div>
