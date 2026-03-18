@@ -2,7 +2,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UserService, { type User } from "@/services/UserService";
-import AttachService from "@/services/AttachService";
+import AttachService, { type Attach } from "@/services/AttachService";
 import { CreateUserDialog } from "./components/CreateUserDialog";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { DeleteUserDialog } from "./components/DeleteUserDialog";
@@ -10,14 +10,16 @@ import { UsersTable } from "./components/UsersTable";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { House } from 'lucide-react';
+import { House, Download, Eye } from 'lucide-react';
 import { CreateAttachsDialog } from "./components/CreateAttachsDialog";
+import { ImagePreviewDialog } from "./components/ImagePreviewDialog";
 
 const userService = new UserService();
 const attachService = new AttachService();
 
 function Dashboard() {
     const [users, setUsers] = useState<User[]>([]);
+    const [userAttachs, setUserAttachs] = useState<Attach[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -25,14 +27,21 @@ function Dashboard() {
     const [attachsDialogOpen, setAttachsDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
+    const [previewOpen, setPreviewOpen] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState("");
+
     const navigate = useNavigate();
 
     const { user: authUser, updateUser: updateAuthUser } = useAuth();
     const isAdmin = authUser?.type === "admin";
 
     useEffect(() => {
-        fetchUsers();
-    }, []);
+        if (isAdmin) {
+            fetchUsers();
+        } else if (authUser?.id) {
+            fetchUserAttachs(authUser.id);
+        }
+    }, [isAdmin, authUser?.id]);
 
     async function fetchUsers() {
         try {
@@ -42,6 +51,20 @@ function Dashboard() {
         } catch (error: any) {
             console.error("Error fetching users:", error);
             const message = error?.response?.data?.error || "Erro ao carregar usuários.";
+            toast.error(message);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    async function fetchUserAttachs(userId: number) {
+        try {
+            setIsLoading(true);
+            const response = await attachService.list(userId);
+            setUserAttachs(response.data);
+        } catch (error: any) {
+            console.error("Error fetching attachs:", error);
+            const message = error?.response?.data?.error || "Erro ao carregar anexos.";
             toast.error(message);
         } finally {
             setIsLoading(false);
@@ -186,15 +209,17 @@ function Dashboard() {
                         <div>
                             <h2 className="text-2xl font-semibold">Dashboard</h2>
                             <p className="text-sm text-muted-foreground">
-                                Gerencie os usuários do sistema
+                                {isAdmin ? "Gerencie os usuários do sistema" : "Veja todos os seus arquivos aqui"}
                             </p>
                         </div>
-                        <CreateUserDialog
-                            open={createDialogOpen}
-                            onOpenChange={setCreateDialogOpen}
-                            onSubmit={handleCreateUser}
-                            disabled={!isAdmin}
-                        />
+                        {isAdmin && (
+                            <CreateUserDialog
+                                open={createDialogOpen}
+                                onOpenChange={setCreateDialogOpen}
+                                onSubmit={handleCreateUser}
+                                disabled={!isAdmin}
+                            />
+                        )}
                     </div>
 
                     <div className="mt-6">
@@ -206,10 +231,45 @@ function Dashboard() {
                                 onDelete={openDeleteDialog}
                                 onAttach={openAttachsDialog}
                             />
+                        ) : isLoading ? (
+                            <div className="flex justify-center p-8"><span className="text-muted-foreground animate-pulse text-sm">Carregando seus arquivos...</span></div>
+                        ) : userAttachs.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {userAttachs.map((attach) => (
+                                    <div key={attach.id} className="p-4 flex flex-col gap-3 rounded-md border border-muted-foreground/20 bg-card">
+                                        <span className="text-sm font-semibold">Lote de Envio #{attach.id}</span>
+                                        <ul className="list-none flex flex-wrap gap-2">
+                                            {attach.files?.map((file: any, i: number) => {
+                                                const isImage = file.name.match(/\.(jpeg|jpg|png|gif|webp)$/i) || file.url.startsWith("data:img") || file.url.startsWith("data:image/");
+                                                return (
+                                                    <li key={i} className="flex gap-2 items-center text-sm border bg-muted/50 px-3 py-2 rounded-md grow justify-between">
+                                                        <span className="truncate max-w-[150px]" title={file.name}>{file.name}</span>
+                                                        <div className="flex gap-2 justify-end">
+                                                            {isImage && (
+                                                                <Button variant="secondary" size="icon" className="h-7 w-7" onClick={() => {
+                                                                    setPreviewUrl(file.url);
+                                                                    setPreviewOpen(true);
+                                                                }}>
+                                                                    <Eye className="h-4 w-4" />
+                                                                </Button>
+                                                            )}
+                                                            <Button variant="outline" size="icon" className="h-7 w-7 border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white" asChild>
+                                                                <a href={file.url} download={file.name}>
+                                                                    <Download className="h-4 w-4" />
+                                                                </a>
+                                                            </Button>
+                                                        </div>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
                         ) : (
-                            <div className="mb-4 p-3 bg-muted/50 rounded-md border border-muted-foreground/20">
-                                <p className="text-sm text-muted-foreground text-center">
-                                    Apenas administradores podem ver, criar, editar ou excluir usuários.
+                            <div className="mb-4 p-5 bg-muted/50 rounded-md border border-muted-foreground/20 flex flex-col items-center justify-center">
+                                <p className="text-muted-foreground text-center">
+                                    Nenhum arquivo enviado para a sua conta ainda.
                                 </p>
                             </div>
                         )}
@@ -235,6 +295,12 @@ function Dashboard() {
                     onOpenChange={setAttachsDialogOpen}
                     onSubmit={handleCreateAttachs}
                     user={selectedUser}
+                />
+
+                <ImagePreviewDialog 
+                    open={previewOpen} 
+                    onOpenChange={setPreviewOpen} 
+                    imageUrl={previewUrl} 
                 />
             </div>
         </div>

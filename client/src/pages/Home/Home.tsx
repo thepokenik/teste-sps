@@ -32,7 +32,7 @@ function Home() {
                                 )}
                                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                                     <Button asChild className="w-full sm:w-auto">
-                                        <Link to="/users">Gerenciar Usuários</Link>
+                                        <Link to="/users">Gerenciar</Link>
                                     </Button>
                                     <Button variant="outline" onClick={logout} className="w-full sm:w-auto">
                                         Sair
