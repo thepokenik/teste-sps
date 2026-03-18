@@ -14,7 +14,7 @@ interface CreateUserData {
     email: string;
     type: string;
     password: string;
-    imageUrl?: string;
+    imageUrl?: File | string;
 }
 
 interface UpdateUserData {
@@ -22,7 +22,7 @@ interface UpdateUserData {
     email?: string;
     type?: string;
     password?: string;
-    imageUrl?: string;
+    imageUrl?: File | string;
 }
 
 class UserService {
@@ -37,7 +37,15 @@ class UserService {
     }
 
     async create(data: CreateUserData): Promise<AxiosResponse<User>> {
-        return api.post<User>(this.baseUrl, data);
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined) {
+                formData.append(key, value as Blob | string);
+            }
+        });
+        return api.post<User>(this.baseUrl, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
     }
 
     async delete(id: number): Promise<AxiosResponse<void>> {
@@ -45,7 +53,15 @@ class UserService {
     }
 
     async update(id: number, data: UpdateUserData): Promise<AxiosResponse<User>> {
-        return api.put<User>(`${this.baseUrl}/${id}`, data);
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined) {
+                formData.append(key, value as Blob | string);
+            }
+        });
+        return api.put<User>(`${this.baseUrl}/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
     }
 }
 

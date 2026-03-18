@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
+import attachRoutes from "./routes/attachRoutes";
 
 if (!process.env.JWT_SECRET) {
     console.error("JWT_SECRET not defined in environment variables");
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/", authRoutes);
 app.use("/", userRoutes);
+app.use("/", attachRoutes);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     if (err?.type === "entity.too.large") {

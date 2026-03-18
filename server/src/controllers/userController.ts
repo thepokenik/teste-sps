@@ -7,7 +7,12 @@ const listUsers = (req: Request, res: Response): void => {
 };
 
 const createUser = (req: Request, res: Response): void => {
-    const { name, email, type, password, imageUrl } = req.body;
+    const { name, email, type, password } = req.body;
+    let { imageUrl } = req.body;
+
+    if (req.file) {
+        imageUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    }
 
     if (!name || !email || !password) {
         res.status(400).json({ error: "Nome, email e senha são obrigatórios" });
@@ -31,7 +36,12 @@ const createUser = (req: Request, res: Response): void => {
 
 const updateUser = (req: Request, res: Response): void => {
     const { id } = req.params;
-    const { name, email, type, password, imageUrl } = req.body;
+    const { name, email, type, password } = req.body;
+    let { imageUrl } = req.body;
+
+    if (req.file) {
+        imageUrl = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    }
 
     const index = users.findIndex((u) => u.id === Number(id));
     if (index === -1) {

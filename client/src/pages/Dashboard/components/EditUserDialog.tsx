@@ -13,19 +13,17 @@ import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import type { User } from "@/services/UserService";
 import { DragDrop, DragDropInfo, DragDropInput } from "@/components/ui/DragDrop";
-import { useFileUploader } from "../../../hooks/useFileUploader";
-import { useEffect, useMemo, useState } from "react";
+import { useFileUploader, UploadedFile } from "../../../hooks/useFileUploader";
+import { useMemo } from "react";
 
 interface EditUserDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    onSubmit: (e: React.FormEvent<HTMLFormElement>, file?: File | null) => void;
     user: User | null;
 }
 
 export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserDialogProps) {
-    const [imageUrl, setImageUrl] = useState<string>("");
-
     const initialFiles = useMemo(
         () => (user?.imageUrl ? [Object.assign(new File([], "current-image"), { url: user.imageUrl })] : []),
         [user?.imageUrl],
@@ -38,35 +36,21 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
         initialFiles,
     });
 
-    useEffect(() => {
-        if (fileUploaderHook.files.length === 0) {
-            setImageUrl("");
-            return;
-        }
+    const selectedFile = fileUploaderHook.files[0] as UploadedFile | undefined;
+    const previewUrl = selectedFile ? (selectedFile.url || URL.createObjectURL(selectedFile)) : "";
 
-        const selectedFile = fileUploaderHook.files[0];
-
-        if (selectedFile.url) {
-            setImageUrl(selectedFile.url);
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImageUrl(typeof reader.result === "string" ? reader.result : "");
-        };
-        reader.onerror = () => {
-            setImageUrl("");
-            console.error("Erro ao processar arquivo");
-        };
-
-        reader.readAsDataURL(selectedFile);
-    }, [fileUploaderHook.files, fileUploaderHook.errors]);
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        // null tells the parent the file was removed; undefined means it might have a file or not. 
+        // Or we just pass the file. If fileUploaderHook.files is empty, selectedFile is undefined.
+        // If there was an image and now there isn't one, we pass null to distinguish.
+        // Actually, if selectedFile is undefined, the parent can know it's empty.
+        onSubmit(e, selectedFile || null);
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-md">
-                <form onSubmit={onSubmit}>
+                <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Editar Usuário</DialogTitle>
                         <DialogDescription>
@@ -124,7 +108,11 @@ export function EditUserDialog({ open, onOpenChange, onSubmit, user }: EditUserD
                                     <DragDropInput id="image" />
                                     <DragDropInfo />
                                 </DragDrop>
-                                <input type="hidden" name="imageUrl" value={imageUrl} />
+                                {previewUrl && (
+                                    <div className="mt-4 flex justify-center">
+                                        <img src={previewUrl} alt="Preview" className="h-24 w-24 object-cover rounded-full shadow-md" />
+                                    </div>
+                                )}
                             </Field>
                         </FieldGroup>
                     </div>

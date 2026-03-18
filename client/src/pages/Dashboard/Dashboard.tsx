@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import UserService, { type User } from "@/services/UserService";
+import AttachService from "@/services/AttachService";
 import { CreateUserDialog } from "./components/CreateUserDialog";
 import { EditUserDialog } from "./components/EditUserDialog";
 import { DeleteUserDialog } from "./components/DeleteUserDialog";
@@ -9,10 +10,11 @@ import { UsersTable } from "./components/UsersTable";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { House, Paperclip } from 'lucide-react';
+import { House } from 'lucide-react';
 import { CreateAttachsDialog } from "./components/CreateAttachsDialog";
 
 const userService = new UserService();
+const attachService = new AttachService();
 
 function Dashboard() {
     const [users, setUsers] = useState<User[]>([]);
@@ -46,17 +48,22 @@ function Dashboard() {
         }
     }
 
-    async function handleCreateUser(e: React.FormEvent<HTMLFormElement>) {
+    async function handleCreateUser(e: React.FormEvent<HTMLFormElement>, file?: File | null) {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const name = formData.get("name") as string;
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const type = formData.get("type") as string;
-        const imageUrl = (formData.get("imageUrl") as string) || undefined;
 
         try {
-            await userService.create({ name, email, type, password, imageUrl });
+            await userService.create({
+                name,
+                email,
+                type,
+                password,
+                ...(file && { imageUrl: file })
+            });
             toast.success("Usuário criado com sucesso!");
             fetchUsers();
             setCreateDialogOpen(false);
@@ -67,7 +74,7 @@ function Dashboard() {
         }
     }
 
-    async function handleUpdateUser(e: React.FormEvent<HTMLFormElement>) {
+    async function handleUpdateUser(e: React.FormEvent<HTMLFormElement>, file?: File | null) {
         e.preventDefault();
         if (!selectedUser) return;
 
@@ -76,12 +83,26 @@ function Dashboard() {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const type = formData.get("type") as string;
-        const imageUrl = (formData.get("imageUrl") as string) ?? "";
+
+        let finalImageUrl: string | File | undefined = undefined;
+
+        if (file === null) {
+            finalImageUrl = "";
+        } else if (file) {
+            if (file.name === "current-image" && file.size === 0) {
+                finalImageUrl = undefined;
+            } else {
+                finalImageUrl = file;
+            }
+        }
 
         try {
-            const updateData: any = { name, email, type, imageUrl };
+            const updateData: any = { name, email, type };
             if (password) {
                 updateData.password = password;
+            }
+            if (finalImageUrl !== undefined) {
+                updateData.imageUrl = finalImageUrl;
             }
 
             const response = await userService.update(selectedUser.id, updateData);
@@ -113,6 +134,30 @@ function Dashboard() {
         } catch (error: any) {
             console.error("Error deleting user:", error);
             const message = error?.response?.data?.error || "Erro ao excluir usuário.";
+            toast.error(message);
+        }
+    }
+
+    async function handleCreateAttachs(e: React.FormEvent<HTMLFormElement>, files: File[] = []) {
+        e.preventDefault();
+        if (!selectedUser) return;
+
+        const formData = new FormData(e.currentTarget);
+        formData.append("user_id", selectedUser.id.toString());
+
+        files.forEach((file) => {
+            formData.append("attachments", file);
+        });
+
+        try {
+            await attachService.create(formData);
+
+            toast.success("Anexos criados com sucesso!");
+            fetchUsers();
+            setAttachsDialogOpen(false);
+        } catch (error: any) {
+            console.error("Error creating attachs:", error);
+            const message = error?.response?.data?.error || "Erro ao criar anexos.";
             toast.error(message);
         }
     }
@@ -188,7 +233,8 @@ function Dashboard() {
                 <CreateAttachsDialog
                     open={attachsDialogOpen}
                     onOpenChange={setAttachsDialogOpen}
-                    onSubmit={handleCreateUser}
+                    onSubmit={handleCreateAttachs}
+                    user={selectedUser}
                 />
             </div>
         </div>

@@ -13,42 +13,28 @@ import { Input } from "@/components/ui/input";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { DragDrop, DragDropInfo, DragDropInput } from "@/components/ui/DragDrop";
-import { useFileUploader } from "../../../hooks/useFileUploader";
-import { useEffect, useState } from "react";
+import { useFileUploader, UploadedFile } from "../../../hooks/useFileUploader";
 
 interface CreateUserDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+    onSubmit: (e: React.FormEvent<HTMLFormElement>, file?: File) => void;
     disabled?: boolean;
 }
 
 export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = false }: CreateUserDialogProps) {
-    const [imageUrl, setImageUrl] = useState<string>("");
-
     const fileUploaderHook = useFileUploader({
         accept: '.png,.jpg,image/jpeg',
         maxSize: 5 * 1024 * 1024, // 5MB
         multiple: false,
     });
 
-    useEffect(() => {
-        if (fileUploaderHook.files.length === 0) {
-            setImageUrl("");
-            return;
-        }
+    const selectedFile = fileUploaderHook.files[0] as UploadedFile | undefined;
+    const previewUrl = selectedFile ? (selectedFile.url || URL.createObjectURL(selectedFile)) : "";
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImageUrl(typeof reader.result === "string" ? reader.result : "");
-        };
-        reader.onerror = () => {
-            setImageUrl("");
-            console.error("Erro ao processar arquivo");
-        };
-
-        reader.readAsDataURL(fileUploaderHook.files[0]);
-    }, [fileUploaderHook.files, fileUploaderHook.errors]);
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        onSubmit(e, selectedFile);
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -56,7 +42,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = fals
                 <Button disabled={disabled}>Criar Usuário</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
-                <form onSubmit={onSubmit}>
+                <form onSubmit={handleSubmit}>
                     <DialogHeader>
                         <DialogTitle>Criar Usuário</DialogTitle>
                         <DialogDescription>
@@ -114,7 +100,6 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, disabled = fals
                                     <DragDropInput id="image" />
                                     <DragDropInfo />
                                 </DragDrop>
-                                <input type="hidden" name="imageUrl" value={imageUrl} />
                             </Field>
                         </FieldGroup>
                     </div>
